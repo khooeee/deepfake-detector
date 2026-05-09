@@ -4,6 +4,11 @@ A web-based application for detecting deepfake images using machine learning. Up
 
 This is an experiment app I vibe coded with IBM Bob.  The model used isn't particularly good so plz don't use it for any serious purpose.
 
+Cost
+- Used trial = 40 Bobcoins (normally $20/month)
+- After I was done, consumed 30 Bobcoins (25% Remaining budget)
+- Time taken ~1hr
+
 ## 🚀 Quick Start
 
 **Prerequisites:** Install [uv](https://github.com/astral-sh/uv) for fast Python package management:
