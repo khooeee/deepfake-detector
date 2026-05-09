@@ -34,7 +34,12 @@ class DeepfakeDetector:
             self.model.to(self.device)
             self.model.eval()
 
-            logger.info("Model loaded successfully")
+            # Get label mapping from model config
+            self.id2label = self.model.config.id2label
+            self.label2id = self.model.config.label2id
+
+            logger.info(f"Model loaded successfully")
+            logger.info(f"Label mapping: {self.id2label}")
         except Exception as e:
             logger.error(f"Failed to load model: {e}")
             raise
@@ -64,12 +69,17 @@ class DeepfakeDetector:
                 logits = outputs.logits
                 probabilities = torch.nn.functional.softmax(logits, dim=1)
 
-            # Get predictions (assuming class 0=real, class 1=fake)
-            fake_prob = probabilities[0][1].item()
-            real_prob = probabilities[0][0].item()
+            # Get predicted class
+            predicted_class_idx = torch.argmax(probabilities, dim=1).item()
+            predicted_label = self.id2label[predicted_class_idx]
 
-            prediction = 'fake' if fake_prob > 0.5 else 'real'
-            confidence = max(fake_prob, real_prob)
+            # Get probabilities for each class
+            real_prob = probabilities[0][self.label2id['Real']].item()
+            fake_prob = probabilities[0][self.label2id['Fake']].item()
+
+            # Determine prediction (use model's prediction)
+            prediction = predicted_label.lower()  # 'real' or 'fake'
+            confidence = probabilities[0][predicted_class_idx].item()
 
             result = {
                 'prediction': prediction,
@@ -80,6 +90,8 @@ class DeepfakeDetector:
                 }
             }
 
+            logger.info(f"Raw logits: {logits[0].tolist()}")
+            logger.info(f"Probabilities: Real={real_prob:.4f}, Fake={fake_prob:.4f}")
             logger.info(f"Prediction: {prediction} (confidence: {confidence:.4f})")
             return result
 
@@ -112,11 +124,16 @@ class DeepfakeDetector:
             # Process results
             results = []
             for i in range(len(image_paths)):
-                fake_prob = probabilities[i][1].item()
-                real_prob = probabilities[i][0].item()
+                # Get predicted class for this image
+                predicted_class_idx = torch.argmax(probabilities[i]).item()
+                predicted_label = self.id2label[predicted_class_idx]
 
-                prediction = 'fake' if fake_prob > 0.5 else 'real'
-                confidence = max(fake_prob, real_prob)
+                # Get probabilities
+                real_prob = probabilities[i][self.label2id['Real']].item()
+                fake_prob = probabilities[i][self.label2id['Fake']].item()
+
+                prediction = predicted_label.lower()
+                confidence = probabilities[i][predicted_class_idx].item()
 
                 results.append({
                     'prediction': prediction,

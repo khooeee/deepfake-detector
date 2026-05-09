@@ -2,6 +2,8 @@
 
 A web-based application for detecting deepfake images using machine learning. Upload an image and get instant analysis on whether it's real or AI-generated/manipulated.
 
+This is an experiment app I vibe coded with IBM Bob.  The model used isn't particularly good so plz don't use it for any serious purpose.
+
 ## 🚀 Quick Start
 
 **Prerequisites:** Install [uv](https://github.com/astral-sh/uv) for fast Python package management:
